@@ -22,19 +22,19 @@ class WavData:
         self.sample_micro_sec = 1 / self.samplerate * 1000000;
         self.length_sec = self.samples_count / self.samplerate
 
-        print(f"sample rate = {self.samplerate}, sample duration = {self.sample_micro_sec} μs")
-        print(f"length = {self.length_sec} s")
+        print(f'sample rate = {self.samplerate}, sample duration = {self.sample_micro_sec} μs')
+        print(f'length = {self.length_sec} s')
 
     def draw(self):
         zoom = 200
         samples_in_zoom = int(self.samples_count / zoom)
         start_time = 2.5 * 1000 * 1000
         time = np.linspace(start_time, self.length_sec / zoom, samples_in_zoom)
-        plt.plot(time, self.data[:samples_in_zoom, 0], label="Left channel")
-        plt.plot(time, self.data[:samples_in_zoom, 1], label="Right channel")
+        plt.plot(time, self.data[:samples_in_zoom, 0], label='Left channel')
+        plt.plot(time, self.data[:samples_in_zoom, 1], label='Right channel')
         plt.legend()
-        plt.xlabel("Time [s]")
-        plt.ylabel("Amplitude")
+        plt.xlabel('Time [s]')
+        plt.ylabel('Amplitude')
         plt.show()
 
 

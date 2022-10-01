@@ -1,5 +1,4 @@
 from enum import Enum
-import numpy as np
 
 from wav_data import WavData
 from byte_parser import ByteParser
@@ -90,7 +89,6 @@ class SampleProcessor:
             self.bit_start = time
             self.sign = new_sign
 
-# Represents data stored in wav file along with its properties of interest
 class PdxDecoder:
     def __init__(self):
         pass

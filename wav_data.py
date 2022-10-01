@@ -22,8 +22,8 @@ class WavData:
         self.sample_micro_sec = 1 / self.sample_rate * 1000000;
         self.length_sec = self.samples_count / self.sample_rate
 
-        print(f'sample rate = {self.sample_rate}, sample duration = {self.sample_micro_sec} μs')
-        print(f'length = {self.length_sec} s')
+        #print(f'sample rate = {self.sample_rate}, sample duration = {self.sample_micro_sec} μs')
+        #print(f'length = {self.length_sec} s')
 
     def draw(self):
         zoom = 10000

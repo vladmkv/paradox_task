@@ -2,6 +2,7 @@ from enum import Enum
 import numpy as np
 
 from wav_data import WavData
+from byte_parser import ByteParser
 
 MAX_MSG_LEN = 4000
 
@@ -9,7 +10,7 @@ MAX_MSG_LEN = 4000
 DURATION_BOUND = 480
 
 # Ignore samples less than threshold
-SAMPLE_THRESHOLD = 10000
+SAMPLE_THRESHOLD = 1000
 
 from enum import Enum
 class State(Enum):
@@ -38,7 +39,7 @@ class BitAccumulator:
         self.current_bits.append(bit)
         if len(self.current_bits) == 11:
             # Check control bits
-            print(self.current_bits)
+            #print(self.current_bits)
             control_bits_ok = \
                 self.current_bits[0] == 0 and \
                 self.current_bits[9] == 1 and \
@@ -46,10 +47,10 @@ class BitAccumulator:
             if not control_bits_ok:
                 raise Exception('Control bits incorrect')
             byte = 0
-            for bit in self.current_bits[1:9]:
+            for bit in self.current_bits[8:0:-1]:
                 byte = (byte << 1) + bit
             self.bytes[self.bytes_count] = byte
-            print(byte)
+            #print(byte)
             self.bytes_count = self.bytes_count + 1
             self.current_bits.clear()
 
@@ -65,8 +66,9 @@ class SampleProcessor:
     def addSample(self, sample, time):
         sample_value = int(sample)
 
-        if abs(sample_value) < SAMPLE_THRESHOLD:
-            print('sample dropeed')
+        amp = abs(sample_value)
+        if amp < SAMPLE_THRESHOLD:
+            #print(f'Sample dropped: {amp}')
             return
 
         new_sign = 1 if sample_value > 0 else -1
@@ -108,7 +110,13 @@ class PdxDecoder:
 
         print(f'Raw bytes decoded: {processor.bits.bytes_count}')
 
+        parser = ByteParser(processor.bits.bytes)
+        parser.parseStream()
+
+        print(f'{parser.text} ({len(parser.text)} bytes)')
+
 if __name__ == '__main__':
     decoder = PdxDecoder()
-    data = WavData('wav/file_1.wav')
-    decoder.decode(data)
+
+    for i in range(1, 4):
+        decoder.decode(WavData(f'wav/file_{i}.wav'))

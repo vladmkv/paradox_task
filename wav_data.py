@@ -13,24 +13,26 @@ class BitDuration(Enum):
 class WavData:
     def __init__(self, file_name):
         self.file_name = file_name
-        self.samplerate, self.data = wavfile.read(file_name)
+        self.sample_rate, self.data = wavfile.read(file_name)
         
         self.num_channels = self.data.shape[1]
         self.samples_count = self.data.shape[0]
 
         # Sample duration in microseconds
-        self.sample_micro_sec = 1 / self.samplerate * 1000000;
-        self.length_sec = self.samples_count / self.samplerate
+        self.sample_micro_sec = 1 / self.sample_rate * 1000000;
+        self.length_sec = self.samples_count / self.sample_rate
 
-        print(f'sample rate = {self.samplerate}, sample duration = {self.sample_micro_sec} μs')
+        print(f'sample rate = {self.sample_rate}, sample duration = {self.sample_micro_sec} μs')
         print(f'length = {self.length_sec} s')
 
     def draw(self):
-        zoom = 200
+        zoom = 10000
         samples_in_zoom = int(self.samples_count / zoom)
-        start_time = 2.5 * 1000 * 1000
+        start_time = 0
         time = np.linspace(start_time, self.length_sec / zoom, samples_in_zoom)
-        plt.plot(time, self.data[:samples_in_zoom, 0], label='Left channel')
+
+        arr = self.data[:samples_in_zoom, 0]
+        plt.plot(time, arr, label='Left channel')
         plt.plot(time, self.data[:samples_in_zoom, 1], label='Right channel')
         plt.legend()
         plt.xlabel('Time [s]')

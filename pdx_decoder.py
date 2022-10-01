@@ -3,7 +3,7 @@ import numpy as np
 
 from wav_data import WavData
 
-MAX_MSG_LEN = 2000
+MAX_MSG_LEN = 4000
 
 # Signal duration in microseconds
 DURATION_BOUND = 480
@@ -11,13 +11,30 @@ DURATION_BOUND = 480
 # Ignore samples less than threshold
 SAMPLE_THRESHOLD = 10000
 
+from enum import Enum
+class State(Enum):
+    SILENCE = 1,
+    LEAD_TONE = 2,
+    DATA = 3,
+    END_BLOCK = 4
+
 class BitAccumulator:
     def __init__(self):
         self.current_bits = list()
         self.bytes = bytearray([0] * MAX_MSG_LEN)
         self.bytes_count = 0
+        self.state = State.SILENCE
 
     def addBit(self, bit):
+        if self.state == State.SILENCE:
+            if bit == 1:
+                self.state = State.LEAD_TONE
+                # Missed start bit
+                self.current_bits.append(0)
+        if self.state == State.LEAD_TONE:
+            self.decodeBit(bit)
+
+    def decodeBit(self, bit):
         self.current_bits.append(bit)
         if len(self.current_bits) == 11:
             # Check control bits
@@ -30,7 +47,7 @@ class BitAccumulator:
                 raise Exception('Control bits incorrect')
             byte = 0
             for bit in self.current_bits[1:9]:
-                byte = byte << 1 + bit
+                byte = (byte << 1) + bit
             self.bytes[self.bytes_count] = byte
             print(byte)
             self.bytes_count = self.bytes_count + 1

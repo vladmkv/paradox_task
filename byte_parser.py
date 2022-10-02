@@ -1,3 +1,4 @@
+import logging
 
 LEADER_BYTES_COUNT = 652
 
@@ -23,11 +24,11 @@ class ByteParser:
             pos = pos + 1
 
         if pos != LEADER_BYTES_COUNT:
-            print(f'Leader length incorrect: {pos}')
+            logging.error(f'Leader length incorrect: {pos}')
 
         pos = pos + 1
         if self.input_bytes[pos] != ID_BYTE_2:
-            print('Header error')
+            logging.error('Header error')
             return
 
         pos = pos + 1
@@ -41,7 +42,7 @@ class ByteParser:
             self.block.extend(list(message))
 
         if self.input_bytes[pos] == 0:
-            print('Terminator OK')
+            logging.info('Terminator OK')
 
         payload_bytes = bytearray(self.block)
         self.text = payload_bytes.decode('ascii')

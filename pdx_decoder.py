@@ -1,5 +1,5 @@
 from enum import Enum
-
+import logging
 from wav_data import WavData
 from byte_parser import ByteParser
 
@@ -14,9 +14,7 @@ SAMPLE_THRESHOLD = 1000
 from enum import Enum
 class State(Enum):
     SILENCE = 1,
-    LEAD_TONE = 2,
-    DATA = 3,
-    END_BLOCK = 4
+    LEAD_TONE = 2
 
 class BitAccumulator:
     def __init__(self):
@@ -38,7 +36,6 @@ class BitAccumulator:
         self.current_bits.append(bit)
         if len(self.current_bits) == 11:
             # Check control bits
-            #print(self.current_bits)
             control_bits_ok = \
                 self.current_bits[0] == 0 and \
                 self.current_bits[9] == 1 and \
@@ -49,7 +46,6 @@ class BitAccumulator:
             for bit in self.current_bits[8:0:-1]:
                 byte = (byte << 1) + bit
             self.bytes[self.bytes_count] = byte
-            #print(byte)
             self.bytes_count = self.bytes_count + 1
             self.current_bits.clear()
 
@@ -67,7 +63,7 @@ class SampleProcessor:
 
         amp = abs(sample_value)
         if amp < SAMPLE_THRESHOLD:
-            #print(f'Sample dropped: {amp}')
+            logging.info(f'Sample dropped: {amp}')
             return
 
         new_sign = 1 if sample_value > 0 else -1
@@ -106,14 +102,15 @@ class PdxDecoder:
             sample = channel[sample_index]
             processor.addSample(sample, time)
 
-        print(f'Raw bytes decoded: {processor.bits.bytes_count}')
+        logging.info(f'Raw bytes decoded: {processor.bits.bytes_count}')
 
         parser = ByteParser(processor.bits.bytes)
         parser.parseStream()
 
-        print(f'{parser.text} ({len(parser.text)} bytes)')
+        print(f'{parser.text} ({len(parser.text)} payload bytes)\n\n')
 
 if __name__ == '__main__':
+    logging.basicConfig(filename='decoder.log', filemode='w', encoding='utf-8', level=logging.DEBUG)
     decoder = PdxDecoder()
 
     for i in range(1, 4):
